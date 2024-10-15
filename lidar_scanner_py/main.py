@@ -15,7 +15,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         mas = []
         while True:
             if i < 360:
-                time.sleep(0.1)  # Sleep for 1 second
+                time.sleep(0.02)  # Sleep for 1 second
                 #d = random.uniform(55,60)  # Example value
                 #conn.sendall(i.encode('utf-8'))
                 #conn.sendall(d.encode('utf-8'))
