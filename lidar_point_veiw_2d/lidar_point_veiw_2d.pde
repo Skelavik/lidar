@@ -54,8 +54,8 @@ void draw() {
        
        println("Received: " + angle , distance );
         
-       float x = centerX + radius * cos(radians(angle)) * (distance / 100.0); 
-       float y = centerY + radius * sin(radians(angle)) * (distance / 100.0); 
+       float x = centerX + radius * cos(radians(angle)) * ((distance * 50) / 100.0); 
+       float y = centerY + radius * sin(radians(angle)) * ((distance * 50 )/ 100.0); 
   
        fill(255,100,0); // Черный цвет точек
        ellipse(x, y, 5, 5); // Рисуем точку

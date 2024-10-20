@@ -46,6 +46,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 data = f"{i}:{distance}"  # Строка с углом и расстоянием
                 conn.sendall(data.encode('utf-8'))
                 i = i + 1
+		#ser.close()
             else:
                 i = 0
 
