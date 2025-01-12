@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Sphere with WebSockets</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@latest"></script>
+    <style>
+        body { margin: 0; }
+        #plot { width: 100%; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="plot"></div>
+    <script>
+        const socket = io();
+
+        let data_points = [];
+
+        socket.on('data', function(msg) {
+            const r = msg.r;
+            const theta = msg.theta;
+            const phi = msg.phi;
+
+            const x = r * Math.cos(phi) * Math.cos(theta);
+            const y = r * Math.cos(phi) * Math.sin(theta);
+            const z = r * Math.sin(phi);
+
+            data_points.push({ x, y, z });
+
+            // Ограничиваем количество точек
+            if (data_points.length > 2000) {
+                data_points.shift();
+            }
+
+            const trace = {
+                x: data_points.map(pt => pt.x),
+                y: data_points.map(pt => pt.y),
+                z: data_points.map(pt => pt.z),
+                mode: 'markers',
+                marker: { size: 2, color: 'orange' },
+                type: 'scatter3d'
+            };
+
+            Plotly.newPlot('plot', [trace], { title: '3D Sphere from Points (Live)', showlegend: false });
+        });
+    </script>
+</body>
+</html>
+
