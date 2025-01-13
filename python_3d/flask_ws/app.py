@@ -7,18 +7,24 @@ import time
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-num_points = 1068
+num_points = 10068
 data_points = []
+
 
 # Функция для генерации данных
 def data_generator():
     while True:
         for i in range(num_points):
-            r = np.random.uniform(300, 300)
+            r = 100  # Фиксированный радиус для сферы
             theta = i * (2 * np.pi / num_points)
             phi = np.random.uniform(0, np.pi)
-            socketio.emit('data', {'r': r, 'theta': theta, 'phi': phi})
-            time.sleep(0.001)
+
+            x = r * np.cos(phi) * np.cos(theta)
+            y = r * np.cos(phi) * np.sin(theta)
+            z = r * np.sin(phi)
+            
+            socketio.emit('data', {'x': x, 'y': y, 'z': z})
+            time.sleep(0.0001)
 
 @app.route('/')
 def index():
