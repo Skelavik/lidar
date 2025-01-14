@@ -34,9 +34,40 @@
         let points;
         let particlesGeometry;
 
+        // Создаем оси
+        const axesHelper = new THREE.AxesHelper( 200 ); // Длина осей
+        scene.add( axesHelper );
+
+
+        // Создание текстовых меток для осей
+
+        const loader = new THREE.FontLoader();
+
+        loader.load('https://unpkg.com/three@0.128.0/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
+                const xTextGeometry = new THREE.TextGeometry('X', { font: font, size: 20, height: 1, });
+               const yTextGeometry = new THREE.TextGeometry('Y', { font: font, size: 20, height: 1, });
+                 const zTextGeometry = new THREE.TextGeometry('Z', { font: font, size: 20, height: 1, });
+
+
+                const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const xText = new THREE.Mesh(xTextGeometry, textMaterial);
+                 const yText = new THREE.Mesh(yTextGeometry, textMaterial);
+                const zText = new THREE.Mesh(zTextGeometry, textMaterial);
+
+
+                xText.position.set(220, 0, 0);
+                yText.position.set(0, 220, 0);
+                  zText.position.set(0, 0, 220);
+
+                scene.add(xText);
+                scene.add(yText);
+                scene.add(zText);
+
+
+         });
        
         socket.on('data', function(msg) {
-            const x = msg.x;
+             const x = msg.x;
             const z = msg.y;
             const y = msg.z;
 
@@ -67,7 +98,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // OrbitControls управляет вращением камеры
+            controls.update();
             renderer.render(scene, camera);
         }
 
@@ -75,5 +106,4 @@
     </script>
 </body>
 </html>
-
 
