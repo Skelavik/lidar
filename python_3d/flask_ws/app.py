@@ -10,21 +10,22 @@ socketio = SocketIO(app)
 num_points = 10068
 data_points = []
 
-
 # Функция для генерации данных
 def data_generator():
     while True:
         for i in range(num_points):
             r = 100  # Фиксированный радиус для сферы
             theta = i * (2 * np.pi / num_points)
-            phi = np.random.uniform(0, np.pi)
+            
+            # Зависимость phi от theta
+            phi =  (i % (num_points // 144)) * (np.pi / (num_points // 144) ) # Делаем так, чтобы было несколько кругов
 
             x = r * np.cos(phi) * np.cos(theta)
             y = r * np.cos(phi) * np.sin(theta)
             z = r * np.sin(phi)
             
             socketio.emit('data', {'x': x, 'y': y, 'z': z})
-            time.sleep(0.0001)
+            time.sleep(0.01)
 
 @app.route('/')
 def index():
@@ -32,5 +33,5 @@ def index():
 
 if __name__ == '__main__':
     threading.Thread(target=data_generator).start()
-    socketio.run(app, debug=True)
+    socketio.run(app, host='0.0.0.0')
 

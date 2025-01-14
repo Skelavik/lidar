@@ -29,24 +29,25 @@
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
         controls.screenSpacePanning = false;
-        
+
         let data_points = [];
         let points;
         let particlesGeometry;
 
+       
         socket.on('data', function(msg) {
             const x = msg.x;
-            const y = msg.y;
-            const z = msg.z;
+            const z = msg.y;
+            const y = msg.z;
 
             data_points.push({x, y, z});
 
             if (data_points.length > 5000) {
                 data_points.shift();
             }
-            
-             if (points){
-                  scene.remove(points);
+
+            if (points) {
+                scene.remove(points);
             }
 
             const vertices = [];
@@ -54,17 +55,19 @@
                 vertices.push(point.x, point.y, point.z);
             });
 
-             particlesGeometry = new THREE.BufferGeometry();
-            particlesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-             const particleMaterial = new THREE.PointsMaterial({color: 0xffa500, size: 3});
-              points = new THREE.Points(particlesGeometry, particleMaterial);
-            scene.add(points);
+
+            particlesGeometry = new THREE.BufferGeometry();
+             particlesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            const particleMaterial = new THREE.PointsMaterial({ color: 0xffa500, size: 3 });
+           points = new THREE.Points(particlesGeometry, particleMaterial);
+             scene.add(points);
+
 
         });
 
         function animate() {
             requestAnimationFrame(animate);
-            controls.update();
+            controls.update(); // OrbitControls управляет вращением камеры
             renderer.render(scene, camera);
         }
 
@@ -72,4 +75,5 @@
     </script>
 </body>
 </html>
+
 
