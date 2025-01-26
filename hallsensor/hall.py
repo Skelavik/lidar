@@ -10,4 +10,4 @@ while True:
 	if(gpio.input(hallpin) == False):
 		print('1')
 	else:
-		print(0)
+		print('0')
