@@ -1,63 +1,74 @@
 import RPi.GPIO as GPIO
 import time
+import threading
 
 # Настройка пинов GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-# Определяем пины для управления L298N
-IN1 = 4  # Input 1
-IN2 = 17  # Input 2
-IN3 = 27  # Input 3
-IN4 = 22  # Input 4
+# Конфигурация двигателей
+MOTOR1_PINS = [4, 17, 27, 22]  # Пин-контакты первого мотора
+MOTOR2_PINS = [26, 19, 13, 6]  # Пин-контакты второго мотора
 
-# Настраиваем пины как выходы
-pins = [IN1, IN2, IN3, IN4]
-for pin in pins:
+# Настройка всех пинов
+all_pins = MOTOR1_PINS + MOTOR2_PINS
+for pin in all_pins:
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
 
-# Последовательность шагов для полношагового режима
+# Последовательность шагов
 STEP_SEQUENCE = [
-    [1, 0, 1, 0],  # Шаг 1: A+ B+
-    [0, 1, 1, 0],  # Шаг 2: A- B+
-    [0, 1, 0, 1],  # Шаг 3: A- B-
-    [1, 0, 0, 1]   # Шаг 4: A+ B-
+    [1, 0, 1, 0],
+    [0, 1, 1, 0],
+    [0, 1, 0, 1],
+    [1, 0, 0, 1]
 ]
 
-# Параметры управления
-STEP_DELAY = 0.001  # Задержка между шагами (регулирует скорость)
-STEPS_PER_REVOLUTION = 200  # Количество шагов на полный оборот (зависит от мотора)
+# Параметры моторов
+MOTOR1_DELAY = 0.0014
+MOTOR2_DELAY = 0.001
+STEPS_PER_REVOLUTION = 200
 
-def rotate_steps(steps, direction=1):
-    """Вращение на указанное количество шагов"""
-    for _ in range(steps):
-        for step in STEP_SEQUENCE[::direction]:
-            GPIO.output(IN1, step[0])
-            GPIO.output(IN2, step[1])
-            GPIO.output(IN3, step[2])
-            GPIO.output(IN4, step[3])
-            time.sleep(STEP_DELAY)
+# Флаги для управления потоками
+run_motors = True
+
+def motor_worker(motor_pins, delay, direction):
+    step_index = 0
+    seq = STEP_SEQUENCE[::direction]
+    seq_len = len(seq)
+    
+    while run_motors:
+        for pin in range(4):
+            GPIO.output(motor_pins[pin], seq[step_index][pin])
+        
+        step_index = (step_index + 1) % seq_len
+        time.sleep(delay)
 
 try:
-    # Пример использования
+    # Создаем и запускаем потоки
+    thread1 = threading.Thread(
+        target=motor_worker, 
+        args=(MOTOR1_PINS, MOTOR1_DELAY, 1)
+    )
+    thread2 = threading.Thread(
+        target=motor_worker, 
+        args=(MOTOR2_PINS, MOTOR2_DELAY, 1)
+    )
+    
+    thread1.start()
+    thread2.start()
+    print("Оба мотора запущены одновременно!")
+
+    # Главный поток просто ждет
     while True:
-        print("Вращение по часовой стрелке")
-        rotate_steps(STEPS_PER_REVOLUTION, direction=1)
-        
-        #print("Пауза 2 секунды")
-        #time.sleep(2)
-        
-        #print("Вращение против часовой стрелки")
-        #rotate_steps(STEPS_PER_REVOLUTION, direction=-1)
-        
-        #print("Пауза 2 секунды")
-        #time.sleep(2)
+        time.sleep(1)
 
 except KeyboardInterrupt:
-    print("Программа остановлена пользователем")
+    print("Остановка...")
+    run_motors = False
+    thread1.join()
+    thread2.join()
 
 finally:
-    # Очистка GPIO
     GPIO.cleanup()
     print("GPIO очищены")
